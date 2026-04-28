@@ -5,7 +5,7 @@ A [pi](https://pi.dev) extension that sends a Linux desktop notification when pi
 It uses:
 
 - `notify-send` for desktop notifications
-- `kitty @ ls` + `KITTY_WINDOW_ID` for kitty-specific focus detection
+- `kitty @ ls --self` + `KITTY_WINDOW_ID` for kitty-specific focus detection
 - xterm focus reporting as a fallback for non-kitty terminals
 
 ## Install

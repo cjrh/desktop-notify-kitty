@@ -59,28 +59,23 @@ function lastAssistantText(messages: any[]): string {
 }
 
 async function getKittyWindowFocused(pi: ExtensionAPI): Promise<boolean | undefined> {
-  const kittyWindowId = Number(process.env.KITTY_WINDOW_ID);
-  if (!Number.isFinite(kittyWindowId)) return undefined;
+  if (!process.env.KITTY_WINDOW_ID) return undefined;
 
   try {
-    const result = await pi.exec("kitty", ["@", "ls"], { timeout: 1000 });
+    const result = await pi.exec("kitty", ["@", "ls", "--self"], { timeout: 1000 });
     if (result.code !== 0 || !result.stdout.trim()) return undefined;
 
-    const osWindows = JSON.parse(result.stdout) as any[];
-    for (const osWindow of osWindows) {
-      for (const tab of osWindow?.tabs ?? []) {
-        for (const win of tab?.windows ?? []) {
-          if (win?.id !== kittyWindowId) continue;
+    const [osWindow] = JSON.parse(result.stdout) as any[];
+    const [tab] = osWindow?.tabs ?? [];
+    const [win] = tab?.windows ?? [];
+    if (!osWindow || !tab || !win) return undefined;
 
-          // kitty reports focus at each level. If a future/older kitty omits a
-          // field, fall back to the corresponding active flag where possible.
-          const osFocused = osWindow.is_focused ?? osWindow.is_active;
-          const tabFocused = tab.is_focused ?? tab.is_active;
-          const winFocused = win.is_focused ?? win.is_active;
-          return osFocused === true && tabFocused === true && winFocused === true;
-        }
-      }
-    }
+    // kitty reports focus at each level. If a future/older kitty omits a
+    // field, fall back to the corresponding active flag where possible.
+    const osFocused = osWindow.is_focused ?? osWindow.is_active;
+    const tabFocused = tab.is_focused ?? tab.is_active;
+    const winFocused = win.is_focused ?? win.is_active;
+    return osFocused === true && tabFocused === true && winFocused === true;
   } catch {
     // Fall through to terminal focus reporting.
   }
