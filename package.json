@@ -1,0 +1,28 @@
+{
+  "name": "desktop-notify-kitty",
+  "version": "0.1.0",
+  "description": "Pi extension that sends desktop notifications via notify-send when a kitty terminal session needs attention.",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "kitty",
+    "notify-send",
+    "desktop-notification"
+  ],
+  "license": "MIT",
+  "author": "Caleb Hattingh <caleb.hattingh@gmail.com>",
+  "type": "module",
+  "files": [
+    "README.md",
+    "LICENSE",
+    "extensions"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ]
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*"
+  }
+}
