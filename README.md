@@ -40,7 +40,7 @@ Inside pi:
 
 The extension listens for pi's `agent_end` lifecycle event. When pi completes a response, it sends a notification only if the current terminal does not appear focused.
 
-The notification includes the current project directory name and a short excerpt from the last assistant message.
+The notification includes the current project directory name and a short, truncated excerpt from the last assistant answer. Thinking/reasoning blocks, tool calls, images, and unknown content blocks are ignored.
 
 ## Requirements
 

@@ -4,7 +4,7 @@ import { basename } from "node:path";
 const APP_NAME = "pi";
 const ICON = "utilities-terminal";
 const EXPIRE_MS = "10000";
-const MAX_BODY_CHARS = 500;
+const MAX_BODY_CHARS = 220;
 
 // XTerm-compatible focus reporting. Most modern terminal emulators support
 // this. It tells pi when this terminal gains/loses keyboard focus.
@@ -13,7 +13,12 @@ const DISABLE_FOCUS_REPORTING = "\x1b[?1004l";
 const FOCUS_IN = "\x1b[I";
 const FOCUS_OUT = "\x1b[O";
 
-function textFromMessage(message: any): string {
+function truncateText(text: string, maxChars = MAX_BODY_CHARS): string {
+  const chars = Array.from(text);
+  return chars.length > maxChars ? `${chars.slice(0, maxChars - 1).join("")}…` : text;
+}
+
+function notificationTextFromMessage(message: any): string {
   const content = message?.content;
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
@@ -21,21 +26,34 @@ function textFromMessage(message: any): string {
   return content
     .map((part) => {
       if (typeof part === "string") return part;
+
+      // Only include assistant answer text. Ignore thinking/reasoning, tool
+      // calls, images, and unknown content blocks even if they have text-ish
+      // fields. Desktop notifications should be short summons, not transcripts.
       if (part?.type === "text" && typeof part.text === "string") return part.text;
-      if (typeof part?.text === "string") return part.text;
       return "";
     })
     .join("")
     .trim();
 }
 
+function compactForNotification(text: string): string {
+  return truncateText(
+    text
+      .replace(/```[\s\S]*?```/g, "[code omitted]")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
+}
+
 function lastAssistantText(messages: any[]): string {
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i];
     if (message?.role !== "assistant") continue;
-    const text = textFromMessage(message).replace(/\s+/g, " ").trim();
+    const text = compactForNotification(notificationTextFromMessage(message));
     if (!text) continue;
-    return text.length > MAX_BODY_CHARS ? `${text.slice(0, MAX_BODY_CHARS - 1)}…` : text;
+    return text;
   }
   return "Done. Come back to this terminal session when ready.";
 }
