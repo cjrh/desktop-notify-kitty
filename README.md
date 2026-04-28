@@ -10,16 +10,16 @@ It uses:
 
 ## Install
 
-From GitHub, after this repo is published:
+From npm:
+
+```bash
+pi install npm:desktop-notify-kitty
+```
+
+Or from GitHub:
 
 ```bash
 pi install git:github.com/cjrh/desktop-notify-kitty
-```
-
-Or with an HTTPS URL:
-
-```bash
-pi install https://github.com/cjrh/desktop-notify-kitty
 ```
 
 Reload any already-running pi session:
