@@ -1,11 +1,12 @@
 {
   "name": "desktop-notify-kitty",
   "version": "0.1.2",
-  "description": "Pi extension that sends desktop notifications via notify-send when a kitty terminal session needs attention.",
+  "description": "Pi extension that sends desktop notifications via kitten notify (kitty) or notify-send when a kitty terminal session needs attention.",
   "keywords": [
     "pi-package",
     "pi-extension",
     "kitty",
+    "kitten-notify",
     "notify-send",
     "desktop-notification"
   ],

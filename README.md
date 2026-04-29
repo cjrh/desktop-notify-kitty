@@ -4,7 +4,8 @@ A [pi](https://pi.dev) extension that sends a Linux desktop notification when pi
 
 It uses:
 
-- `notify-send` for desktop notifications
+- `kitten notify` for desktop notifications in kitty (clicking the notification jumps back to the originating window)
+- `notify-send` as a fallback for non-kitty terminals
 - `kitty @ ls --self` + `KITTY_WINDOW_ID` for kitty-specific focus detection
 - xterm focus reporting as a fallback for non-kitty terminals
 
@@ -45,9 +46,9 @@ The notification includes the current project directory name and a short, trunca
 ## Requirements
 
 - Linux desktop notification service
-- `notify-send` on `PATH`
-- kitty terminal for best focus detection
-- kitty remote control must be available for `kitty @ ls`
+- kitty terminal: `kitten notify` is used automatically (kitty ≥ 0.36.0)
+- Non-kitty terminals: `notify-send` on `PATH` (fallback)
+- kitty remote control must be available for `kitty @ ls` (focus detection)
 
 If kitty focus detection is unavailable, the extension falls back to generic terminal focus reporting.
 

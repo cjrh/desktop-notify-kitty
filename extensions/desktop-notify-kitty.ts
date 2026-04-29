@@ -3,7 +3,7 @@ import { basename } from "node:path";
 
 const APP_NAME = "pi";
 const ICON = "utilities-terminal";
-const EXPIRE_MS = "10000";
+const EXPIRE_AFTER = "10s";
 const MAX_BODY_CHARS = 220;
 
 // XTerm-compatible focus reporting. Most modern terminal emulators support
@@ -89,14 +89,38 @@ async function sendDesktopNotification(
   body: string,
   urgency: "low" | "normal" | "critical" = "normal",
 ): Promise<{ ok: boolean; error?: string }> {
+  // Prefer `kitten notify` when running inside kitty — clicking the
+  // notification jumps back to the originating kitty window.
+  const isKitty = !!process.env.KITTY_WINDOW_ID;
+
   try {
+    if (isKitty) {
+      const result = await pi.exec(
+        "kitten",
+        [
+          "notify",
+          `--app-name=${APP_NAME}`,
+          `--icon=${ICON}`,
+          `--urgency=${urgency}`,
+          `--expire-after=${EXPIRE_AFTER}`,
+          title,
+          body,
+        ],
+        { timeout: 3000 },
+      );
+
+      if (result.code === 0) return { ok: true };
+      return { ok: false, error: (result.stderr || result.stdout || `exit code ${result.code}`).trim() };
+    }
+
+    // Fallback for non-kitty terminals.
     const result = await pi.exec(
       "notify-send",
       [
         `--app-name=${APP_NAME}`,
         `--icon=${ICON}`,
         `--urgency=${urgency}`,
-        `--expire-time=${EXPIRE_MS}`,
+        `--expire-time=10000`,
         title,
         body,
       ],
@@ -174,7 +198,7 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("desktop-notify-test", {
-    description: "Send a test desktop notification using notify-send",
+    description: "Send a test desktop notification",
     handler: async (_args, ctx) => {
       const result = await sendDesktopNotification(
         pi,
@@ -184,7 +208,7 @@ export default function (pi: ExtensionAPI) {
       if (result.ok) {
         ctx.ui.notify("Desktop notification sent.", "info");
       } else {
-        ctx.ui.notify(`notify-send failed: ${result.error ?? "unknown error"}`, "error");
+        ctx.ui.notify(`Desktop notification failed: ${result.error ?? "unknown error"}`, "error");
       }
     },
   });
